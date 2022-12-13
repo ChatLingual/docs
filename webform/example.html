@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatLingual Example Webform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      const disableSubmitButton = () => {
+        const submitButton = document.getElementById('cl-webform-example').querySelector('button[type="submit"]');
+        submitButton.innerHTML = 'Submitting...';
+        submitButton.setAttribute('disabled', true);
+      };
+
+      const enableSubmitButton = () => {
+        const submitButton = document.getElementById('cl-webform-example').querySelector('button[type="submit"]');
+        submitButton.innerHTML = 'Submit';
+        submitButton.removeAttribute('disabled');
+      };
+
+      const clearForm = () => {
+        const elements = document.getElementById('cl-webform-example').querySelectorAll('input,textarea,select');
+        elements.forEach((element) => element.value = null);
+      };
+
+      window.chatlingual = {
+        debug: true,
+        apiKey: '<API_KEY>', // please contact ChatLingual to receive an API key
+        apiEndpoint: 'https://graphql.staging.chatlingual.com/graphql',
+        webform: {
+          listener: {
+            querySelector: '#cl-webform-example',
+            event: 'submit'
+          },
+          hooks: {
+            beforeSubmit: function(e) {
+              // the event `e` is only supplied here when the `listener`
+              // config is supplied above
+              if (e) {
+                e.preventDefault();
+              }
+
+              disableSubmitButton();
+            },
+            afterSubmit: function() {
+              enableSubmitButton();
+              clearForm();
+            },
+            onError: function(err) {
+              enableSubmitButton();
+            },
+          },
+          form: {
+            language: 'es',
+            conversation: function() {
+              const subject = document.getElementById('subject');
+              const body = document.getElementById('body');
+              const category = document.getElementById('category');
+              const resolution = document.getElementById('resolution');
+              const multipleFiles = document.getElementById('files');
+              const singleFile = document.getElementById('file');
+
+              const filesA = multipleFiles ? multipleFiles.files : [];
+              const filesB = singleFile ? singleFile.files : [];
+
+              // combine files from both inputs into a single array
+              const attachments = [...filesA, ...filesB];
+
+              return {
+                channel: 'email',
+                email: {
+                  subject: subject && subject.value,
+                  body: body && body.value,
+                  attachments,
+                },
+                fields: {
+                  category: category && category.value,
+                  resolution: resolution && resolution.value,
+                },
+              }
+            },
+            customer: function() {
+              const firstName = document.getElementById('first-name');
+              const lastName = document.getElementById('last-name');
+              const email = document.getElementById('email');
+
+              return {
+                firstName: firstName && firstName.value,
+                lastName: lastName && lastName.value,
+                email: email && email.value,
+                fields: {
+                  name: 'value',
+                },
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <!-- Please contact ChatLingual for Webform script URL -->
+    <script type="module" src="<WEBFORM_SCRIPT_SRC>"></script>
+  </head>
+  <body class="h-screen flex items-center justify-center bg-gray-50">
+    <form id="cl-webform-example" class="p-4 space-y-3 border border-gray-100 rounded bg-white w-1/2 shadow-lg shadow-sky-600/20">
+      <h1 class="text-sky-600">ChatLingual Webform Example</h1>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="email">Email</label>
+        <input class="text-sm w-full py-2 px-3 bg-gray-50" id="email" type="email" placeholder="Enter your email address" />
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="first-name">First name</label>
+        <input class="text-sm w-full py-2 px-3 bg-gray-50" id="first-name" type="text" placeholder="Enter your first name" />
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="last-name">Last name</label>
+        <input class="text-sm w-full py-2 px-3 bg-gray-50" id="last-name" type="text" placeholder="Enter your last name" />
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="subject">Subject</label>
+        <input class="text-sm w-full py-2 px-3 bg-gray-50" id="subject" type="text" placeholder="Enter the subject" />
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="body">Message</label>
+        <textarea class="text-sm w-full py-2 px-3 bg-gray-50" id="body" placeholder="Enter your question here"></textarea>
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="files">Multiple files</label>
+        <input class="text-sm w-full py-2 px-3 bg-gray-50" id="files" type="file" multiple placeholder="Upload multiple files" />
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="file">Single file</label>
+        <input class="text-sm w-full py-2 px-3 bg-gray-50" id="file" type="file" placeholder="Upload a single file" />
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="category">Category</label>
+        <select class="text-sm w-full py-2 px-3 bg-gray-50" id="category">
+          <option value="Category A">Category A</option>
+          <option value="Category B">Category B</option>
+          <option value="Category C">Category C</option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <label class="block mb-2 text-xs text-gray-600" for="resolution">Resolution</label>
+        <select class="text-sm w-full py-2 px-3 bg-gray-50" id="resolution">
+          <option value="Resolution A">Resolution A</option>
+          <option value="Resolution B">Resolution B</option>
+          <option value="Resolution C">Resolution C</option>
+        </select>
+      </fieldset>
+      <fieldset>
+        <button type="submit" class="bg-sky-600 rounded text-white py-2 px-3 mt-1 w-full text-center disabled:bg-gray-200 disabled:text-gray-600">Submit</button>
+      </fieldset>
+    </form>
+  </body>
+</html>
