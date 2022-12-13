@@ -6,23 +6,13 @@
   <div>
     <h1>Webform Listener</h1>
   </div>
-</div>
-<div align="center">
-  <a href="[README.md#Getting Started](https://github.com/ChatLingual/docs/tree/main/webform#getting-started)">Getting Started</a>
-  —
-  <a href="[README.md#Configuration](https://github.com/ChatLingual/docs/tree/main/webform#configuration)">Configuration</a>
-  —
-  <a href="[README.md#Example](https://github.com/ChatLingual/docs/tree/main/webform#example)">Example</a>
-  —
-  <a href="[README.md#Questions](https://github.com/ChatLingual/docs/tree/main/webform#questions)">Example</a>
+  The ChatLingual Webform Listener integrates new and existing website forms with ChatLingual. With some simple configuration, any existing page element can be used to create conversations within ChatLingual.
 </div>
 
 <div><br/></div>
 <div><br/></div>
 
 ## Getting Started
-
-The ChatLingual Webform Listener integrates new and existing website forms with ChatLingual. With some simple configuration, any existing page element can be used to create conversations within ChatLingual.
 
 First, the ChatLingual configuration object needs to be declared as a global variable (i.e. a variable attached to the global `window` object that can be accessed from the main JavaScript thread). Second, the Webform Listener script must be embedded within the page that includes the form. Scripts are typically embedded within the `<head>` tag, but this may vary depending on your page's implementation.
 
