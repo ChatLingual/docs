@@ -180,3 +180,11 @@ chatlingual.webform.form = {
 The above example assumes that your page has some elements with the IDs `#body`, `#subject`, `#custom-field-a`, `#custom-field-b`, `#custom-field-c`, `#first-name`, `#last-name`, and `#email`. The Webform Listener isn't opinionated on how your form is structured. It only cares that the `.customer()` and `.conversation()` functions return valid objects set when submitting the form.
 
 You're able to specify custom field sets for both the conversation and the customer by adding the `.fields` key, which needs to return an object whose keys are the field names. ChatLingual provisions the custom fields and can provide the list of custom fields for both the conversation and the customer. In the above example, the conversation has two custom fields: `custom_field_a` and `custom_field_b`. The customer has one custom field: `custom_field_c`.
+
+## Example
+
+Refer to this [example](example.html) for a full implementation.
+
+## Questions
+
+Please [reach out to us](help@chatlingual.com) with any questions on implementation or best practices.
