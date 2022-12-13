@@ -112,6 +112,8 @@ Hooks can be used to accomplish more advanced user experiences, such as toggling
 
 If `chatlingual.webform.listener` is omitted, the `beforeSubmit` and `afterSubmit` do not accept arguments.
 
+You can also use `window.chatlingual.webform.submit` directly, instead of relying on the listener. This gives you complete flexibility on how to submit the form.
+
 ### `chatlingual.webform.form: Form`
 
 ```ts
