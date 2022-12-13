@@ -6,19 +6,19 @@
     <title>ChatLingual Example Webform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      const disableSubmitButton = () => {
+      function disableSubmitButton() {
         const submitButton = document.getElementById('cl-webform-example').querySelector('button[type="submit"]');
         submitButton.innerHTML = 'Submitting...';
         submitButton.setAttribute('disabled', true);
       };
 
-      const enableSubmitButton = () => {
+      function enableSubmitButton() {
         const submitButton = document.getElementById('cl-webform-example').querySelector('button[type="submit"]');
         submitButton.innerHTML = 'Submit';
         submitButton.removeAttribute('disabled');
       };
 
-      const clearForm = () => {
+      function clearForm() {
         const elements = document.getElementById('cl-webform-example').querySelectorAll('input,textarea,select');
         elements.forEach((element) => element.value = null);
       };
