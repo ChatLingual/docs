@@ -43,11 +43,11 @@ For example, the following HTML shows how one might structure this at a high-lev
               // optionally, a set of functions that fire at different points during
               // the lifecycle of a form submission
               hooks: { ... },
-              // the function that returns customer information
+              // function that returns customer information when called
               customer: () => { ... },
-              // the function that returns conversation information
+              // function that returns conversation information when called
               conversation: () => { ... },
-              // the function that returns email information
+              // function that returns email information when called
               email: () => { ... },
             }
           }
@@ -86,7 +86,7 @@ The API endpoint provided by ChatLingual.
 
 An object, whose keys are the `WebformSubmitType` (either `'submitEmail'`, or `'submitEmailReply'`) and values are configuration settings.
 
-Use `'submitEmail'` for creating new conversations within ChatLingual. Use `'submitEmailReply'` for following up with existing conversations, i.e. submitting a response to an existing ticket through a form.
+Use `'submitEmailReply'` for following up with existing conversations, typically via submitting a response to an existing ticket through a form.
 
 The data requirements (i.e. the objects returned by `.email()` and `.conversation()`, and `.customer()`) differ based on this type. See below for information on required fields:
 
@@ -112,9 +112,9 @@ const listener = {
 };
 ```
 
-will attach the `submit` event handler to the DOM element with the ID `your-form`. The conversation will be created within ChatLingual when `your-form` fires the configured event, in this case the `submit` event.
+will attach the `submit` event handler to the DOM element with the ID `your-form`. The conversation will be created within ChatLingual when `your-form` fires the configured event (in this case the `submit` event).
 
-The listener provides a convenient way to declaratively describe form behavior but is not required. For advanced use cases, where you might need granular control over _when_ or _how_ the form is submitted, you can call the submit functions directly. The script attaches both `submitEmail()` and `submitEmailReply` directly to the global ChatLingual configuration:
+The listener provides a convenient way to declaratively describe form behavior but is not required. For advanced use cases, where you might need granular control over _when_ or _how_ the form is submitted, you can call the submit functions directly. The script attaches both `submitEmail` and `submitEmailReply` directly to the global ChatLingual configuration:
 
 ```ts
 window.chatlingual.webform.submitEmail();
@@ -137,7 +137,7 @@ type Hooks {
 }
 ```
 
-Hooks provide a way to perform logic before or after a form submission or when an error occurs. When a listener is provided, the event will be provided to `beforeSubmit()`'s first argument, and `afterSubmit()`'s second argument. When a listener is omitted, the `beforeSubmit()` and `afterSubmit()` hooks don't accept any arguments.
+Hooks provide a way to perform logic before or after a form submission or when an error occurs. When a listener is provided, the event will be provided to `beforeSubmit()`'s first argument and `afterSubmit()`'s second argument. When a listener is omitted, the `beforeSubmit()` and `afterSubmit()` hooks don't accept any arguments.
 
 As an example, the following block will prevent a form from executing its default behavior when submitted (i.e. refreshing the page):
 
@@ -172,7 +172,7 @@ type Conversation {
   // the ID of an external system that's associated with the ChatLingual
   // conversation, i.e. a ticket number from a CRM
   externalId: string;
-  // optionally,  custom fields that'll populate the Agent Desktop's Conversation Details
+  // optionally,  custom fields that'll populate ChatLingual's conversation details
   fields?: Record<string, any>;
 };
 ```
@@ -187,7 +187,7 @@ type Customer {
   email: string;
   firstName?: string;
   lastName?: string;
-  // optionally, custom fields that'll populate the Agent Desktop's Customer Details
+  // optionally, custom fields that'll populate ChatLingual's customer details
   fields?: Record<string, any>;
 }
 ```
