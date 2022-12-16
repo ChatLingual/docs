@@ -35,19 +35,21 @@ For example, the following HTML shows how one might structure this at a high-lev
           // optionally, the customer's language override
           language: '<LANGUAGE_CODE>',
           // configurations (see details below)
-          ['submitEmail' | 'submitEmailRepy']: {
-            // optionally, an object that lets ChatLingual respond to configured
-            // events on an element on the page
-            listener: { ... },
-            // optionally, a set of functions that fire at different points during
-            // the lifecycle of a form submission
-            hooks: { ... },
-            // the function that returns customer information
-            customer: () => { ... },
-            // the function that returns conversation information
-            conversation: () => { ... },
-            // the function that returns email information
-            email: () => { ... },
+          configs: {
+            ['submitEmail' | 'submitEmailRepy']: {
+              // optionally, an object that lets ChatLingual respond to configured
+              // events on an element on the page
+              listener: { ... },
+              // optionally, a set of functions that fire at different points during
+              // the lifecycle of a form submission
+              hooks: { ... },
+              // the function that returns customer information
+              customer: () => { ... },
+              // the function that returns conversation information
+              conversation: () => { ... },
+              // the function that returns email information
+              email: () => { ... },
+            }
           }
         },
       };
