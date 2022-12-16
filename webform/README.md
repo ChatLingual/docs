@@ -26,18 +26,29 @@ For example, the following HTML shows how one might structure this at a high-lev
       chatlingual = {
         // API key provided by ChatLingual
         apiKey: '<API_KEY>',
-        // API endpoint provided by ChatLingual
-        apiEndpoint: '<API_ENDPOINT>',
         // flag that enables verbose console logging
         debug: true | false,
         // webform listener configuration
         webform: {
-          // listener config (see below for details)
-          listener: { ... },
-          // hooks config (see below for details)
-          hooks: { ... },
-          // form config (see below for details)
-          form: { ... },
+          // API endpoint provided by ChatLingual
+          endpoint: '<ENDPOINT>',
+          // optionally, the customer's language override
+          language: '<LANGUAGE_CODE>',
+          // configurations (see details below)
+          ['submitEmail' | 'submitEmailRepy']: {
+            // optionally, an object that lets ChatLingual respond to configured
+            // events on an element on the page
+            listener: { ... },
+            // optionally, a set of functions that fire at different points during
+            // the lifecycle of a form submission
+            hooks: { ... },
+            // the function that returns customer information
+            customer: () => { ... },
+            // the function that returns conversation information
+            conversation: () => { ... },
+            // the function that returns email information
+            email: () => { ... },
+          }
         },
       };
     </script>
@@ -59,17 +70,23 @@ This section breaks down the ChatLingual configuration object (`window.chatlingu
 
 ### `chatlingual.apiKey: string`
 
-This is the API key provisioned by ChatLingual.
-
-### `chatlingual.apiEndpoint: string`
-
-The API endpoint pointing towards your infrastructure provided by ChatLingual.
+The API key provisioned by ChatLingual.
 
 ### `chatlingual.debug: boolean?`
 
 Instructs the script to output additional debugging logs to the console. This property is useful when embedding this script for the first time, typically in a test page where noisy log output doesn't matter. It's not recommended to set this property to `true` in production environments.
 
-### `chatlingual.webform.listener: Listener?`
+### `chatlingual.webform.endpoint: string`
+
+The API endpoint provided by ChatLingual.
+
+### `chatlingual.webform.configs[type]: WebformSubmitType`
+
+The type of form submission, either `'submitEmail'` or `'submitEmailReply'`. Use `'submitEmail'` for creating new conversations within ChatLingual. Use `'submitEmailReply'` for following up with existing conversations, i.e. submitting a response to an existing ticket through a form.
+
+The data requirements (i.e. the objects returned by `.email()` and `.conversation()`, and `.customer()`) differ based on this type. See below for information on required fields:
+
+### `chatlingual.webform.configs[type]: Listener?`
 
 ```ts
 type Listener {
@@ -80,75 +97,89 @@ type Listener {
 }
 ```
 
-When `chatlingual.webform.listener` is provided, the script will automatically attach an event listener to the DOM element found using `querySelector`.
+When a listener is provided, the script will automatically attach an event listener to the DOM element found using `querySelector`.
 
 For example, the following block:
 
 ```ts
-chatlingual.webform.listener = {
+const listener = {
   querySelector: "#your-form",
   event: "submit",
 };
 ```
 
-will attach the `submit` event handler to the DOM element with the ID `your-form`. The conversation will be created within ChatLingual when `your-form` is fires the configured event, in this case the `submit` event.
+will attach the `submit` event handler to the DOM element with the ID `your-form`. The conversation will be created within ChatLingual when `your-form` fires the configured event, in this case the `submit` event.
 
-### `chatlingual.webform.hooks: Hooks?`
+The listener provides a convenient way to declaratively describe form behavior but is not required. For advanced use cases, where you might need granular control over _when_ or _how_ the form is submitted, you can call the submit functions directly. The script attaches both `submitEmail()` and `submitEmailReply` directly to the global ChatLingual configuration:
+
+```ts
+window.chatlingual.webform.submitEmail();
+window.chatlingual.webform.submitEmailReply();
+```
+
+For example, this code block will submit an email when `customButton` is clicked.
+
+```ts
+customButton.addEventListener("click", window.chatlingual.webform.submitEmail);
+```
+
+### `chatlingual.webform.configs[type].hooks: Hooks?`
 
 ```ts
 type Hooks {
   beforeSubmit: (e?: Event) => void;
-  afterSubmit: (e?: Event) => void;
+  afterSubmit: (response: any, e?: Event) => void;
   onError: (err?: any) => void;
 }
 ```
 
-Hooks provide a way to perform logic before or after a form submission or when an error occurs. If the form submission fires from the event listener described by `chatlingual.webform.listener`, the event will be passed into the hook for `beforeSubmit` and `afterSubmit`. This can be used to control the behavior of the submission.
+Hooks provide a way to perform logic before or after a form submission or when an error occurs. When a listener is provided, the event will be provided to `beforeSubmit()`'s first argument, and `afterSubmit()`'s second argument. When a listener is omitted, the `beforeSubmit()` and `afterSubmit()` hooks don't accept any arguments.
 
-For example, the following block will prevent a form from executing its default behavior when submitted (i.e. refreshing the page):
+As an example, the following block will prevent a form from executing its default behavior when submitted (i.e. refreshing the page):
 
 ```ts
-chatlingual.webform.listener = {
+const listener = {
   querySelector: "#your-form",
   event: "submit",
 };
 
-chatlingual.webform.hooks = {
-  beforeSubmit: (e) => e.preventDefault(),
+const hooks = {
+  // prevent the default form submit action
+  beforeSubmit: (e) => {
+    // `e` here is only provided if the submission was called using an event listener
+    if (e) {
+      e.preventDefault();
+    }
+  },
 };
 ```
 
-Hooks can be used to accomplish more advanced user experiences, such as toggling loading states in the UI, showing error toasts, etc.
+Hooks can be used to accomplish more advanced user experiences, such as toggling loading states in the UI, showing error toasts, etc. Refer to this [example](example.html) to see how hooks can be used.
 
-If `chatlingual.webform.listener` is omitted, the `beforeSubmit` and `afterSubmit` do not accept arguments.
+### `chatlingual.webform.configs[type].conversation: () => Conversation`
 
-You can also use `window.chatlingual.webform.submit` directly, instead of relying on the listener. This gives you complete flexibility on how to submit the form.
-
-### `chatlingual.webform.form: Form`
+The `conversation()` function returns an object that's sent along to ChatLingual. The data returned by this is specific to the conversation, and the fields depend on the type of form submission. There aren't any required fields when the submission type is `submitEmail`, but either the `id` or `externalId` properties are required when the submission type is `submitEmailReply`.
 
 ```ts
-type Form {
-  // defaults to the browser's language, but can be used to override the browser
-  language?: string;
-  conversation?: () => Conversation;
-  customer?: () => Customer
-};
-
 type Conversation {
-  // email is the only supported channel at the moment
-  channel: 'email';
-  // data pertaining to the email conversation that'll be created within ChatLingual
-  email: {
-    subject: string;
-    body: string;
-    attachments: File[];
-  };
+  // the ChatLingual conversation ID (either this or `externalId`) is required
+  // when the submission type is 'submitEmailReply'
+  id: string;
+  // the ID of an external system that's associated with the ChatLingual
+  // conversation, i.e. a ticket number from a CRM
+  externalId: string;
   // optionally,  custom fields that'll populate the Agent Desktop's Conversation Details
   fields?: Record<string, any>;
 };
+```
 
+For `submitEmailReply`, ChatLingual will either use `id` or `externalId` to look up the existing conversations to submit the reply to.
+
+### `chatlingual.webform.configs[type].customer: () => Customer`
+
+```ts
 type Customer {
-  // che customer's email address
+  // the customer's email address
   email: string;
   firstName?: string;
   lastName?: string;
@@ -157,41 +188,38 @@ type Customer {
 }
 ```
 
-The `chatlingual.webform.form` object has two keys that'll be used to create the data needed to submit the conversation to ChatLingual, `chatlingual.webform.form.conversation()` and `chatlingual.webform.form.conversation()`. Both of these keys are JavaScript functions and are executed when the form is submitted. This provides an opportunity to collect and structure all of the necessary conversation and customer data needed to create a conversation within ChatLingual.
+### `chatlingual.webform.configs[type].email: () => Email`
 
-For example, the following block illustrates a configuration that'll collect data from some elements on the page that will be used to create an `email` conversation:
-
-```js
-chatlingual.webform.form = {
-  conversation: function() {
-    return {
-      channel: 'email',
-      email: {
-        body: document.getElementById('body').value,
-        subject: document.getElementById('subject').value,
-      },
-      fields: {
-        'custom_field_a': document.getElementById('custom-field-a').value
-        'custom_field_b': document.getElementById('custom-field-b').value
-      }
-    };
-  },
-  customer: function() {
-    return {
-      firstName: document.getElementById('first-name').value,
-      lastName: document.getElementById('last-name').value,
-      email: document.getElementById('email').value,
-      fields: {
-        'custom_field_c': document.getElementById('custom-field-c').value
-      }
-    };
-  }
-};
+```ts
+type Email {
+  // the subject is only required when the submission type is `submitEmail`,
+  // for `submitEmailReply` this can be omitted
+  subject: string;
+  body: string;
+  attachments: File[];
+}
 ```
 
-The above example assumes that your page has some elements with the IDs `#body`, `#subject`, `#custom-field-a`, `#custom-field-b`, `#custom-field-c`, `#first-name`, `#last-name`, and `#email`. The Webform Listener isn't opinionated on how your form is structured. It only cares that the `.customer()` and `.conversation()` functions return valid objects set when submitting the form.
+This object structures the actual email that'll be sent.
 
-You're able to specify custom field sets for both the conversation and the customer by adding the `.fields` key, which needs to return an object whose keys are the field names. ChatLingual provisions the custom fields and can provide the list of custom fields for both the conversation and the customer. In the above example, the conversation has two custom fields: `custom_field_a` and `custom_field_b`. The customer has one custom field: `custom_field_c`.
+## Debugging
+
+It's recommended to set `window.chatlingual.debug` to `true` when configuring this for the first time.
+
+It's also possible to inspect the data before form submissions are called using the [Dev Tools console](https://developer.chrome.com/docs/devtools/console/).
+
+The following functions can be invoked before submission to check whether they're returning the correct data.
+
+```ts
+window.chatlingual.webform.configs.submitEmail.conversation();
+window.chatlingual.webform.configs.submitEmail.customer();
+window.chatlingual.webform.configs.submitEmail.email();
+window.chatlingual.webform.configs.submitEmailReply.conversation();
+window.chatlingual.webform.configs.submitEmailReply.customer();
+window.chatlingual.webform.configs.submitEmailReply.email();
+```
+
+The script will also report errors to the console if the data isn't structured correctly. In addition, the `onError` hook will be invoked with invalid data, which can be used for displaying errors to the end user.
 
 ## Example
 
