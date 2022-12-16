@@ -82,13 +82,15 @@ Instructs the script to output additional debugging logs to the console. This pr
 
 The API endpoint provided by ChatLingual.
 
-### `chatlingual.webform.configs[type]: WebformSubmitType`
+### `chatlingual.webform.configs: Record<WebformSubmitType, WebformConfig>`
 
-The type of form submission, either `'submitEmail'` or `'submitEmailReply'`. Use `'submitEmail'` for creating new conversations within ChatLingual. Use `'submitEmailReply'` for following up with existing conversations, i.e. submitting a response to an existing ticket through a form.
+An object, whose keys are the `WebformSubmitType` (either `'submitEmail'`, or `'submitEmailReply'`) and values are configuration settings.
+
+Use `'submitEmail'` for creating new conversations within ChatLingual. Use `'submitEmailReply'` for following up with existing conversations, i.e. submitting a response to an existing ticket through a form.
 
 The data requirements (i.e. the objects returned by `.email()` and `.conversation()`, and `.customer()`) differ based on this type. See below for information on required fields:
 
-### `chatlingual.webform.configs[type]: Listener?`
+### `chatlingual.webform.configs[type].listener: Listener?`
 
 ```ts
 type Listener {
