@@ -162,7 +162,7 @@ Hooks can be used to accomplish more advanced user experiences, such as toggling
 
 ### `chatlingual.webform.configs[type].conversation: () => Conversation`
 
-The `conversation()` function returns an object that's sent along to ChatLingual. The data returned by this is specific to the conversation, and the fields depend on the type of form submission. There aren't any required fields when the submission type is `submitEmail`, but either the `id` or `externalId` properties are required when the submission type is `submitEmailReply`.
+The `conversation()` function returns an object that's sent along to ChatLingual. The object returned by this is specific to the conversation, and the fields depend on the type of form submission. There aren't any required fields when the submission type is `submitEmail`, but either the `id` or `externalId` properties are required when the submission type is `submitEmailReply`.
 
 ```ts
 type Conversation {
@@ -177,7 +177,7 @@ type Conversation {
 };
 ```
 
-For `submitEmailReply`, ChatLingual will either use `id` or `externalId` to look up the existing conversations to submit the reply to.
+For `submitEmailReply` ChatLingual will either use `id` or `externalId` to look up the existing conversation. If found, a response will be submitted to that existing conversation.
 
 ### `chatlingual.webform.configs[type].customer: () => Customer`
 
