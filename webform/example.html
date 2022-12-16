@@ -26,71 +26,71 @@
       window.chatlingual = {
         debug: true,
         apiKey: '<API_KEY>', // please contact ChatLingual to receive an API key
-        apiEndpoint: 'https://graphql.staging.chatlingual.com/graphql',
         webform: {
-          listener: {
-            querySelector: '#cl-webform-example',
-            event: 'submit'
-          },
-          hooks: {
-            beforeSubmit: function(e) {
-              // the event `e` is only supplied here when the `listener`
-              // config is supplied above
-              if (e) {
-                e.preventDefault();
-              }
+          endpoint: '<ENDPOINT>',
+          language: 'es', // this example assumes customer speaks Spanish
+          configs: {
+            submitEmail: {
+              hooks: {
+                beforeSubmit: function(e) {
+                  // the event `e` is only supplied here when the `listener`
+                  // config is supplied above
+                  if (e) {
+                    e.preventDefault();
+                  }
 
-              disableSubmitButton();
-            },
-            afterSubmit: function() {
-              enableSubmitButton();
-              clearForm();
-            },
-            onError: function(err) {
-              enableSubmitButton();
-            },
-          },
-          form: {
-            language: 'es',
-            conversation: function() {
-              const subject = document.getElementById('subject');
-              const body = document.getElementById('body');
-              const category = document.getElementById('category');
-              const resolution = document.getElementById('resolution');
-              const multipleFiles = document.getElementById('files');
-              const singleFile = document.getElementById('file');
+                  disableSubmitButton();
+                },
+                afterSubmit: function() {
+                  enableSubmitButton();
+                  clearForm();
+                },
+                onError: function(err) {
+                  enableSubmitButton();
+                },
+              },
+              conversation: function() {
+                const category = document.getElementById('category');
+                const resolution = document.getElementById('resolution');
 
-              const filesA = multipleFiles ? multipleFiles.files : [];
-              const filesB = singleFile ? singleFile.files : [];
+                return {
+                  fields: {
+                    category: category && category.value,
+                    resolution: resolution && resolution.value,
+                  },
+                }
+              },
+              customer: function() {
+                const firstName = document.getElementById('first-name');
+                const lastName = document.getElementById('last-name');
+                const email = document.getElementById('email');
 
-              // combine files from both inputs into a single array
-              const attachments = [...filesA, ...filesB];
+                return {
+                  firstName: firstName && firstName.value,
+                  lastName: lastName && lastName.value,
+                  email: email && email.value,
+                  fields: {
+                    name: 'value',
+                  },
+                }
+              },
+              email: function() {
+                const subject = document.getElementById('subject');
+                const body = document.getElementById('body');
+                const multipleFiles = document.getElementById('files');
+                const singleFile = document.getElementById('file');
 
-              return {
-                channel: 'email',
-                email: {
-                  subject: subject && subject.value,
+                const filesA = multipleFiles ? multipleFiles.files : [];
+                const filesB = singleFile ? singleFile.files : [];
+
+                // combine files from both inputs into a single array
+                const attachments = [...filesA, ...filesB];
+
+                return {
                   body: body && body.value,
+                  subject: subject && subject.value,
                   attachments,
-                },
-                fields: {
-                  category: category && category.value,
-                  resolution: resolution && resolution.value,
-                },
-              }
-            },
-            customer: function() {
-              const firstName = document.getElementById('first-name');
-              const lastName = document.getElementById('last-name');
-              const email = document.getElementById('email');
-
-              return {
-                firstName: firstName && firstName.value,
-                lastName: lastName && lastName.value,
-                email: email && email.value,
-                fields: {
-                  name: 'value',
-                },
+                }
               }
             }
           }
